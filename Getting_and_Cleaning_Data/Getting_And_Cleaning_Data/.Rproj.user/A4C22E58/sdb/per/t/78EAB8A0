@@ -1,0 +1,16 @@
+{
+    "contents" : "library('lattice')\nlibrary('ggplot2')\nwin_estimators <- read.csv('win_estimators.csv')\navgRuns <- mean(win_estimators$R)\navgRunsAllowed <- mean(win_estimators$RA)\nx<- avgRuns - sqrt(avgRuns^2/(1/(.500-1/162)-1))\n\nestimators <- win_estimators[c('RperG', 'RAperG', 'WPct','Cook_WPct',\n                               'Soolman_WPct',  'Kross_WPct', 'Smyth_WPct',\n                               'BJames_Pythag_WPct', 'BJames_Pythag_WPctII')]\nsplom(estimators, xlab='Win Estimators')\nwpct_95th_pct = quantile(win_estimators$WPct, .95)\ntop_winners = win_estimators[win_estimators$WPct >= wpct_95th_pct, ]\nAL_East_Teams <- c(\"NYA\",\"BAL\",\"BOS\",\"TOR\",\"TBA\")\nNL_West_Teams <- c(\"ARI\",\"COL\",\"LAN\",\"SDN\",\"SFN\")\nAL_East_estimator <- win_estimators[win_estimators$teamID %in% AL_East_Teams,]\nAL_East_estimator <- AL_East_estimator[c('R','RA','RperG', 'RAperG', 'WPct','Cook_WPct',\n                                         'Soolman_WPct',  'Kross_WPct', 'Smyth_WPct',\n                                         'BJames_Pythag_WPct', 'BJames_Pythag_WPctII')]\nNL_West_estimator <- win_estimators[win_estimators$teamID %in% NL_West_Teams,]\nNL_West_estimator <- NL_West_estimator[c('R','RA','RperG', 'RAperG', 'WPct','Cook_WPct',\n                                         'Soolman_WPct',  'Kross_WPct', 'Smyth_WPct',\n                                         'BJames_Pythag_WPct', 'BJames_Pythag_WPctII')]\nAL_East_300_750_WPct <- AL_East_estimator[AL_East_estimator$WPct >= .300 &\n                                              AL_East_estimator$WPct <= .750,]\nprint(sd(AL_East_300_750_WPct$WPct))\nprint(sd(AL_East_300_750_WPct$Kross_WPct))\nprint(sd(AL_East_300_750_WPct$Soolman_WPct))\nNL_West_300_750_WPct <- NL_West_estimator[NL_West_estimator$WPct >= .300 &\n                                              NL_West_estimator$WPct <= .750,]\nprint(sd(NL_West_300_750_WPct$WPct))\nprint(sd(NL_West_300_750_WPct$Kross_WPct))\nprint(sd(NL_West_300_750_WPct$Soolman_WPct))\n\nMean_AL_East_WPct <- mean(AL_East_estimator$WPct)\nMean_NL_West_WPct <- mean(NL_West_estimator$WPct)\navgRuns_AL_East <- mean(AL_East_estimator$R)\navgRuns_NL_West <- mean(NL_West_estimator$R)\navgRunsAll_AL_East <- mean(AL_East_estimator$RA)\navgRunsAll_NL_West <- mean(NL_West_estimator$RA)\n\nx_AL_East<- avgRuns_AL_East - sqrt(avgRunsAll_AL_East^2/(1/(Mean_AL_East_WPct-1/162)-1))\nx_NL_West<- avgRuns_NL_West - sqrt(avgRunsAll_NL_West^2/(1/(Mean_NL_West_WPct-1/162)-1))",
+    "created" : 1403298072436.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3783556528",
+    "id" : "78EAB8A0",
+    "lastKnownWriteTime" : 1403204256,
+    "path" : "~/Dropbox/Sabermetrics_R/sabermetrics_101_week4.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
