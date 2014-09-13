@@ -1,0 +1,16 @@
+{
+    "contents" : "# Read in the raw data with smaller subset close to dates of interest\n# 2007-02-01 through 2007-02-02\ndata <- read.csv2(\"./household_power_consumption.txt\", nrows = 8000,\n                  header = TRUE, stringsAsFactors = FALSE, skip=65000)\n\n# Set names of columns\ncolnames(data) <- c(\"Date\",\"Time\",\"Global_active_power\",\n                    \"Global_reactive_power\",\"Voltage\",\"Global_intensity\",\n                    \"Sub_metering_1\",\"Sub_metering_2\",\"Sub_metering_3\")\n\n# Combine the Date and Time columns into new column\ndata$datetime <- paste(data$Date, data$Time, sep=\" \")\ndata$datetime <- strptime(data$datetime, format = \"%d/%m/%Y %T\")\n\n# Convert columns to appropriate formats\ndata$Global_active_power <- as.numeric(data$Global_active_power)\ndata$Global_reactive_power <- as.numeric(data$Global_reactive_power)\ndata$Voltage <- as.numeric(data$Voltage)\ndata$Global_intensity <- as.numeric(data$Global_intensity)\ndata$Sub_metering_1 <- as.numeric(data$Sub_metering_1)\ndata$Sub_metering_2 <- as.numeric(data$Sub_metering_2)\ndata$Sub_metering_3 <- as.numeric(data$Sub_metering_3)\n\n# Subset the data for dates only in range of interest\ndata$day <- data$datetime$mday          #day of month\ndata$month <- data$datetime$mon+1       #month of year (zer-indexed)\ndata$year <- data$datetime$year+1900    #years since 1900\ndata$dayofweek <- weekdays.POSIXt(data$datetime, abbreviate=TRUE)\ndata <- data[data$year == 2007 & data$month==2 & data$day>=1 & data$day<=2,]\n\n# plot histogram\npng(filename = \"plot1.png\", width = 480, height = 480, units = \"px\",\n    bg = \"white\")\nhist(data$Global_active_power, col=\"red\", breaks=12,\n     main = \"Global Active Power\", xlab = \"Global Active Power (kilowatts)\",\n     ylab = \"Frequency\")\ndev.off()",
+    "created" : 1404862333479.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2322515103",
+    "id" : "B3CBE111",
+    "lastKnownWriteTime" : 1404864737,
+    "path" : "~/Documents/School/John's Hopkins Data Science/ExploratoryDataAnalysis/ExData_plotting1/plot1.R",
+    "project_path" : "plot1.R",
+    "properties" : {
+    },
+    "source_on_save" : true,
+    "type" : "r_source"
+}

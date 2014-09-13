@@ -1,0 +1,17 @@
+{
+    "contents" : "data <- read.table(pipe('grep \"^[1-2]/2/2007\" \"household_power_consumption.txt\"'),header=FALSE, sep=';')\ndata$V2<- strptime(paste(data$V1,data$V2), \"%d/%m/%Y %H:%M:%S\")\npng(filename='plot2_version2.png', width=480, height=480)\nplot(data$V2, data$V3, type='l', xlab='', ylab='Global Active Power (kilowatts)')\ndev.off()",
+    "created" : 1405300750413.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2213645481",
+    "id" : "8548728B",
+    "lastKnownWriteTime" : 1405635970,
+    "path" : "~/Documents/School/John's Hopkins Data Science/ExploratoryDataAnalysis/ExData_plotting1/plot2_version2.R",
+    "project_path" : "plot2_version2.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : true,
+    "type" : "r_source"
+}

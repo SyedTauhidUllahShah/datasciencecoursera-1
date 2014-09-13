@@ -1,0 +1,5 @@
+data <- read.table(pipe('grep "^[1-2]/2/2007" "household_power_consumption.txt"'),header=FALSE, sep=';')
+data$V2<- strptime(paste(data$V1,data$V2), "%d/%m/%Y %H:%M:%S")
+png(filename='plot2_version2.png', width=480, height=480)
+plot(data$V2, data$V3, type='l', xlab='', ylab='Global Active Power (kilowatts)')
+dev.off()
