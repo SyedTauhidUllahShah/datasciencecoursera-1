@@ -1,0 +1,72 @@
+---
+title: "Analysis of the Effect of Certain Weather Events on Public Health and Economy"
+---
+
+## Synopsis
+This report shows how certain weather events can affect public health in terms of aggregate injuries and fatalities as well as economic damage to property and crops.  The data show that by an order of magnitude, tornados affect public health most, with 96,979 combined injuries and fatalities, with Excessive Heat second at 8,428.  Floods are found to cause the most property and crop damage, resulting in a total damage value of approximately $150B.  Although, hurricanes and typhoons cost nearly $72B in damage, tornados are the most damaging overall when combining public health affects and economic damage of approximately $57B.
+
+## Data Processing
+```{r echo = TRUE, cache = TRUE}
+library(R.utils)
+# Unzip and read in the raw data archive
+bunzip2("repdata-data-StormData.csv.bz2", "repdata-data-StormData.csv", overwrite = TRUE, remove = FALSE)
+StormData <- read.csv("repdata-data-StormData.csv")
+```
+
+To determine the types of events which affect public health most, we will use the total FATALITIES and INJURIES based on each type of event:
+
+```{r echo = TRUE}
+library(plyr)
+PublicHealthSummary <- ddply(StormData, .(EVTYPE), summarize, total.injuries.and.fatalities = sum(FATALITIES, INJURIES))
+# Order in descending order
+PublicHealthSummary <- PublicHealthSummary[order(-PublicHealthSummary$total.injuries.and.fatalities), ]
+# Take the top 10
+TotPubHealthSum <- PublicHealthSummary[1:10, ]
+```
+
+To determine the types of events which have the greatest economic consequences, we will use the total PROPDMG and CROPDMG based on each type of event:
+
+```{r echo = TRUE}
+# Multiply the property damage and copy damage cost by factor to put value in $1B
+StormData$PROPDMGAct <- with(StormData, 
+                         ifelse(PROPDMGEXP=="K", PROPDMG/1e+06,
+                                ifelse(PROPDMGEXP=="M", PROPDMG/1000,
+                                       ifelse(PROPDMGEXP=="B", PROPDMG, 
+                                              0*PROPDMG))))
+StormData$CROPDMGAct <- with(StormData, 
+                         ifelse(CROPDMGEXP=="K", CROPDMG/1e+06,
+                                ifelse(CROPDMGEXP=="M", CROPDMG/1000,
+                                       ifelse(CROPDMGEXP=="B", CROPDMG, 
+                                              0*CROPDMG))))
+
+EconConseqSummary <- ddply(StormData, .(EVTYPE), summarize, total.economic.damage = sum(PROPDMGAct, CROPDMGAct))
+# Order in descending order
+EconConseqSummary <- EconConseqSummary[order(-EconConseqSummary$total.economic.damage), ]
+# Take the top 10
+TotEconConseqSum <- EconConseqSummary[1:10, ]
+```
+
+## Results
+
+The first table and plot show the top ten weather events that most affect public health.  The measure of interest is total number of fatalities plus injuries.  These results show that tornados are by far the most damaging weather event to public health.
+
+```{r, echo = TRUE}
+library(ggplot2)
+TotPubHealthSum
+q <- qplot(EVTYPE, data = TotPubHealthSum, geom = "bar", weight = total.injuries.and.fatalities,
+           main = "Weather Events that Affect Public Health Most",
+           xlab = "Weather Event Type",
+           ylab = "Total Injuries and Fatalities")
+q + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+The next table and plot show the top ten weather events which have the greatest economic consequences.  The measure of interest is total cost of property damage plus crop damage (in $1B).  These results show that floods are by far the most damaging weather event in terms of economic cost, but hurricanes and typhoons, tornados, and storm surges levy significant economic cost as well.
+
+```{r, echo = TRUE}
+TotEconConseqSum
+q <- qplot(EVTYPE, data = TotEconConseqSum, geom = "bar", weight = total.economic.damage,
+           main = "Weather Events which Have the Greatest Economic Consequence",
+           xlab = "Weather Event Type",
+           ylab = "Total Property and Crop Damage (in $1B)")
+q + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```

@@ -1,0 +1,17 @@
+{
+    "contents" : "# Question 1\ndata(mtcars)\nfit <- lm(mpg ~ wt + factor(cyl), data = mtcars)\n#print(coef(fit))\n\n# Question 2\nfit_adj <- lm(mpg ~ factor(cyl), data=mtcars)\nfit_unadj <- lm(mpg ~ wt + factor(cyl), data=mtcars)\nprint(coef(fit_adj))\nprint(coef(fit_unadj))\n\n# Question 3\nfit1 <- lm(mpg ~ wt + factor(cyl), data=mtcars)\nfit2 <- update(fit1, mpg ~ wt*factor(cyl))\nprint(anova(fit1, fit2))\n\n# Question 4\nfit <- lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)\nprint(coef(fit))\n\n# Question 5\nx <- c(0.586, 0.166, -0.042, -0.614, 11.72)\ny <- c(0.549, -0.026, -0.127, -0.751, 1.344)\n#print(hat(x, intercept = TRUE))\n\n# Question 6\nx <- c(0.586, 0.166, -0.042, -0.614, 11.72)\ny <- c(0.549, -0.026, -0.127, -0.751, 1.344)\nfit <- lm(y ~ x)\nprint(lm.influence(fit)$hat)\nprint(dfbetas(fit))",
+    "created" : 1410266086750.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "393754790",
+    "id" : "DFB5E2A5",
+    "lastKnownWriteTime" : 1410285105,
+    "path" : "~/Documents/School/John's Hopkins Data Science/Regression_Models/Quiz_3.R",
+    "project_path" : "Quiz_3.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : true,
+    "type" : "r_source"
+}

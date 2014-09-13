@@ -1,0 +1,16 @@
+{
+    "contents" : "#Question 1\nBaseline <- c(140, 138, 150, 148, 135)\nWeek2 <- c(132, 135, 151, 146, 130)\ntt <- t.test(Baseline, Week2, paired=TRUE, alternative=\"two.sided\")\nprint(tt)\n\n#Question 2\navg <- 1100\nsd <- 30\nn <- 9\nse <-  sd/sqrt(n)\nqtile <- qt(.975, df=n-1)\nprint(avg + c(-1, 1) * qtile * se)\n\n#Question 3\npCoke <- .75\np <- pbinom(3, size = 4, prob = .75, lower.tail = FALSE)\nprint(p)\n\n# Question 4\nn1 <- 100\nm1 <- 1\nn2 <- 1787\nm2 <- 10\nlambda <- m1/n1 * n2\np <- ppois(m2, lambda, lower.tail = TRUE)\nprint(p)\n\n# Question 5\nn.dp <- 9\nn.pla <- 9\navg.dp <- -3\navg.pla <- 1\nsd.dp <- 1.5\nsd.pla <- 1.8\nvar.pool <- ((n.dp-1)*sd.dp^2+(n.pla-1)*sd.pla^2)/(n.dp+n.pla-2)\nt <- (avg.dp-avg.pla)/sqrt(var.pool*(1/n.dp+1/n.pla))\nprint(2*pt(-abs(t), df=n.dp+n.pla-2))\n\n# Question 6\nn <- 9\nci.l <- 1077\nci.u <- 1123\nalpha <- .05\nmu <- 1078\n\n# Question 7\nn <- 100\navg <- .01\nsd <- .04\nalpha <- .05\ndf <- n-1\nse <- sd / sqrt(n)\nt <- qt(1-alpha, df=df)\nncp <- .01/(se)\n#power <- pt(avg + t*se, df=df, lower.tail=FALSE)\npower <- power.t.test(n=n, sd=sd, delta=avg, sig.level=0.05, type=\"one.sample\", alternative=\"one.sided\")$power\nprint(power)\n\n# Question 8\navg <- .01\nsd <- .04\nn <- power.t.test(sd=sd, delta=avg, sig.level=0.05, alternative = \"one.sided\", type=\"one.sample\", power = .90)\nprint(n)\n\n# Question 10\nn.Met <- 288\navg.Met <- 44\nn.Got <- 288\navg.Got <- 42.04\nsd <- 12\nz <- (avg.Met - avg.Got)/sqrt(sd^2*(1/n.Met+1/n.Got))\np = 2*pnorm(-abs(z))\nprint(p)\n",
+    "created" : 1410302122875.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "276852682",
+    "id" : "911C8D05",
+    "lastKnownWriteTime" : 1410403026,
+    "path" : "~/Documents/School/John's Hopkins Data Science/Statistical_Inference/Quiz_4.R",
+    "project_path" : "Quiz_4.R",
+    "properties" : {
+    },
+    "source_on_save" : true,
+    "type" : "r_source"
+}
