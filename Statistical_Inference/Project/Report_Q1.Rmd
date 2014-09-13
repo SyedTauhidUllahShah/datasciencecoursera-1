@@ -1,0 +1,36 @@
+---
+title: "Simulation of the Distribution of Means of an Exponential Distribution"
+output: pdf_document
+---
+
+This report studies the sampling distribution of means (SDM) for an exponential distribution with parameter $\lambda$ equal to `r lambda=0.2; lambda`.  By simulating `r nosim=1000; nosim` such distributions, we will show that the theoretical center of the distribution of means is `r mean.theo=1/lambda; mean.theo` with standard deviation `r sd.theo=1/lambda; sd.theo`.
+
+#### Simulating the exponential RVs
+```{r}
+library(ggplot2)
+set.seed(12345)
+n <- 40
+means <- sapply(1:nosim, function(dummy) {
+     mean(rexp(n, lambda))
+})
+```
+
+#### The mean and standard error of the SDM
+Given the simulated data, we compute that the mean and standard deviation of the distribution of averages is `r meanDist = mean(means); meanDist` (theoretically `r mean.theo`) and `r sdDist = sd(means); sdDist`, respectively.  The standard deviation of the distribution of averages is usually called the standard error of the mean.  Theoretically the standard error is `r se.theo = sd.theo/sqrt(n); se.theo`.  From these results, we see that the computed values of the mean and standard error differ from theory by `r (meanDist-mean.theo)/mean.theo*100`% and `r (sdDist-se.theo)/se.theo*100`%, respectively.
+
+#### Normality of the SDM
+By the central limit theorem (CLT), we know that the SDM approaches a normal distribution as $n \to \infty$.  Thus we expect near normality here since we sampled with $n =$ `r n`, which when greater than 30 approximates normality pretty well.  Graphically, we can also see the asymptotic normality of the SDM by looking at the following plot of the histogram with superimposed gaussian curve:
+``` {r, echo=FALSE}
+     library(ggplot2)
+     dat <- data.frame(means = means)
+     g <- ggplot(dat, aes(x = means)) 
+     g <- g + geom_histogram(binwidth=.3, color="black", aes(y = ..density..))
+     g <- g + stat_function(fun = dnorm, args=list(mean=mean.theo, sd=se.theo))
+     g  
+```
+
+#### 95% confidence interval for $1/\lambda$
+The 95% confidence interval for $1/\lambda$ is given by the equation $\bar{X} \pm 1.96 \frac{S}{\sqrt{n}}$.  Thus, the confidence interval for $1/\lambda$ is [`r confIntMean = meanDist + c(-1,1)*1.96*sdDist; confIntMean`].  Thus, we see that $1/\lambda$ = `r mean.theo` lies almost exactly in the center of the confidence interval, which is expected by the CLT.
+
+#### Conclusion
+In conclusion, we see that the SDM does indeed asymptotically approach normality with mean and standard deviation very close to the theoretical values as predicted by the CLT.
