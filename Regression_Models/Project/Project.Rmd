@@ -9,7 +9,7 @@ output: html_document
 In this study, we showed...
 
 ## Exploratory Data Analysis and Data Summary
-This data set has `r sum(!complete.cases(ToothGrowth))` incomplete cases.  Additionally, each variable's summary statistics are
+This data set has `r sum(!complete.cases(ToothGrowth))` incomplete cases.  Moreover, each variable's summary statistics are
 ``` {r, echo=FALSE}
      library(plyr)
      library(ggplot2)
@@ -19,7 +19,20 @@ This data set has `r sum(!complete.cases(ToothGrowth))` incomplete cases.  Addit
      summary(mtcars)
 ```
 
+``` {r, echo=FALSE}
+     full.model <- lm(mpg ~ ., data=mtcars)
+     model1 <- update(full.model, mpg ~ . -cyl)
+     model2 <- update(model1, mpg ~ . -vs)
+     model3 <- update(model2, mpg ~ . -carb)
+     reduced.model <- step(full.model, direction="backward")
+```
+
+
 ## Appendix
 ``` {r, echo = FALSE}
      pairs(mtcars, main = "Scatterplot of mtcars Data")
+```
+Summary of full model fit
+``` {r, echo = FALSE}
+     summary(full.model)
 ```
