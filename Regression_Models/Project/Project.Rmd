@@ -1,0 +1,25 @@
+---
+title: "Exploring the Relationship Between Auto Transmission Type and MPG"
+#author: "lytemar"
+#date: "09/13/2014"
+output: html_document
+---
+
+## Executive Summary
+In this study, we showed...
+
+## Exploratory Data Analysis and Data Summary
+This data set has `r sum(!complete.cases(ToothGrowth))` incomplete cases.  Additionally, each variable's summary statistics are
+``` {r, echo=FALSE}
+     library(plyr)
+     library(ggplot2)
+     library(car)
+     library(lattice)
+     data(mtcars)
+     summary(mtcars)
+```
+
+## Appendix
+``` {r, echo = FALSE}
+     pairs(mtcars, main = "Scatterplot of mtcars Data")
+```
