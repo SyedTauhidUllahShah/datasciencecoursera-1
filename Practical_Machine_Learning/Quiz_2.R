@@ -1,8 +1,10 @@
 # Quiz 2
-
-# Question 1
 library(AppliedPredictiveModeling)
 library(caret)
+library(Hmisc)
+
+
+# Question 1
 data(AlzheimerDisease)
 
 adData = data.frame(diagnosis,predictors)
@@ -11,9 +13,7 @@ training = adData[trainIndex,]
 testing = adData[-trainIndex,]
 
 # Question 2
-library(AppliedPredictiveModeling)
 data(concrete)
-library(caret)
 set.seed(975)
 inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
 training = mixtures[ inTrain,]
