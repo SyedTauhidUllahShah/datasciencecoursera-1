@@ -22,9 +22,30 @@ training = mixtures[ inTrain,]
 testing = mixtures[-inTrain,]
 xTrain = seq(1,length(training$CompressiveStrength))
 xTest = seq(1,length(testing$CompressiveStrength))
+str(training)
 
-colors <- names(mixtures)
-colors <- colors[-9]
-g <- ggplot(training, aes(x = xTrain, y = CompressiveStrength, color = FlyAsh))
-g <- g + geom_point()
-print(g)
+qplot(xTrain, CompressiveStrength, color = Cement, data = training)
+qplot(xTrain, CompressiveStrength, color = BlastFurnaceSlag, data = training)
+qplot(xTrain, CompressiveStrength, color = FlyAsh, data = training)
+qplot(xTrain, CompressiveStrength, color = Water, data = training)
+qplot(xTrain, CompressiveStrength, color = Superplasticizer, data = training)
+qplot(xTrain, CompressiveStrength, color = CoarseAggregate, data = training)
+qplot(xTrain, CompressiveStrength, color = FineAggregate, data = training)
+qplot(xTrain, CompressiveStrength, color = Age, data = training)
+
+# Question 3
+data(concrete)
+set.seed(975)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+hist(training$Superplasticizer)
+#plot(log10(training$Superplasticizer))
+
+# Question 4
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
