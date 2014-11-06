@@ -49,3 +49,27 @@ adData4 = data.frame(diagnosis,predictors)
 inTrain4 = createDataPartition(adData4$diagnosis, p = 3/4)[[1]]
 training4 = adData4[ inTrain4,]
 testing4 = adData4[-inTrain4,]
+
+PredIL4 <- grep("^IL", names(training4))
+preProc4 <- preProcess(training4[,PredIL4], method="pca", thresh=.8)
+print(preProc4$numComp)
+
+# Question 5
+set.seed(3433)
+data(AlzheimerDisease)
+adData5 = data.frame(diagnosis,predictors)
+trainingIndex5 <- grep("^IL", names(adData5))
+inTrain5 = createDataPartition(adData5$diagnosis, p = 3/4)[[1]]
+training5 = cbind(adData5[ inTrain5,trainingIndex5], adData5[ inTrain5,"diagnosis"])
+testing5 = cbind(adData5[ -inTrain5,trainingIndex5], adData5[ -inTrain5,"diagnosis"])
+colnames(training5)[13] <- "diagnosis"
+colnames(testing5)[13] <- "diagnosis"
+
+preProc5 <- preProcess(training5[,-13], method="pca", thresh=.8)
+trainPC5 <- predict(preProc5, training5[,-13])
+modelFitPC5 <- train(training5$diagnosis ~ ., method="glm", data=trainPC5)
+testPC5 <- predict(preProc5, testing5[,-13])
+print(confusionMatrix(testing5$diagnosis, predict(modelFitPC5, testPC5)))
+
+modelFitFull5 <- train(training5$diagnosis ~ ., method="glm", data=training5)
+print(confusionMatrix(testing5$diagnosis, predict(modelFitFull5, testing5)))
