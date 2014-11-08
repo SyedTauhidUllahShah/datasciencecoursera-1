@@ -61,6 +61,33 @@ testing3 = concrete[-inTrain3,]
 
 set.seed(233)
 modFit3 = train(CompressiveStrength ~ ., method="lasso", data=training3)
+plot(modFit3$finalModel, xvar="penalty", use.color=TRUE)
 
+# Question 4
+library(lubridate)  # For year() function below
+library(forecast)
+dat = read.csv("gaData.csv")
+training = dat[year(dat$date) < 2012,]
+testing = dat[(year(dat$date)) > 2011,]
+tstrain = ts(training$visitsTumblr)
 
+fit4 <- bats(tstrain)
+fcast <- forecast(fit4, h=length(testing$X))
+#fcast <- forecast(fit4)
+testing <- testing[1:length(fcast$lower[,2]),]
+testCompare <- sum((testing$visitsTumblr >= fcast$lower[,2])&(testing$visitsTumblr <= fcast$upper[,2]))
+percentCI = testCompare/length(testing$X)
 
+# Question 5
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+
+set.seed(325)
+library(e1071)
+model <- svm(CompressiveStrength ~ ., data=training )
+testPred <- predict(model, testing)
+RMSE = sqrt(mean((testPred - testing$CompressiveStrength)^2))
