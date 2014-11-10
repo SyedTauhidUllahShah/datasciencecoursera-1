@@ -73,7 +73,7 @@ modFit <- train(classe ~ ., data=trainingRed2, method='svmRadial',
 ```
 
 # Purpose
-The purpose of this document is to predict how well several people did barbell lifts using data from accelerometers on their belt, forearm, arm and dumbell in use.  The participants were asked to perform barbell lifts correctly and incorrectly in `r length(unique(training$classe))` different ways.  Thus, the goal is to train a model to predict which of the r length(unique(training$classe))` different ways the exercise was performed.
+The purpose of this document is to predict how well several people did barbell lifts using data from accelerometers on their belt, forearm, arm and dumbell in use.  The participants were asked to perform barbell lifts correctly and incorrectly in `r length(unique(training$classe))` different ways.  Thus, the goal is to train a model to predict which of the `r length(unique(training$classe))` different ways the exercise was performed.
 
 # Data Reduction
 The training and test sets contain raw data as well as summary statistics of the raw data.  The summary statistics, average, variance, standard deviation, skewness, kurtosis, minimum, maximum, total and amplitude have been removed for modelling purposes as most of the entries of these summary columns are NA.  Additionally, the various non-numeric features, such as the time stamps, X, new_window, and user_name have been removed as they are inconsequential to model formation.  From this data reduction, the amount of columns in each data set is reduced from `r ncol(training)` to `r ncol(trainingRed2)`.
@@ -88,7 +88,7 @@ The figures below show the results of the model prediction giving the best final
      modFit$finalModel
 ```
 
-From these results, we obtain our estimate for the out-of-sample error listed as the training error (`r round(modFit$finalModel@error*100,2)`%).  Next, we plot the model fit to show how the training accuracy varies with the svm penalty cost parameter, which is varied automatically by the svm algorithm.
+From these results, we obtain our estimate for the out-of-sample error listed as the training error (`r round(modFit$finalModel@error*100,2)`%).  Next, we plot the model fit to show how the training accuracy varies with the SVM penalty cost parameter, which is varied automatically by the SVM algorithm.
 
 ``` {r}
      p <- ggplot(modFit)
@@ -97,4 +97,4 @@ From these results, we obtain our estimate for the out-of-sample error listed as
 ```
 
 # Conclusion
-In conclusion, we used SVM with radial basis function kernel and `r K`-fold cross-validation to obtain a classification prediction model that is highly accurate (`r round(modFit$results[3,3]*100,1)`%) with a decent out-of-sample error )`r round(modFit$finalModel@error*100,2)`%).  We chose to compute the models by incorporating all subjects into one group because that provided a larger training set, which provides a lower in-sample error, and via cross-validation, a lower out-of-sample error.  Finally, we could have used linear discriminant analysis or random forests as prediction algorithms, but it is current thinking that SVM is more mathematically robust between the three, so we chose SVM with good results. 
+In conclusion, we used SVM with radial basis function kernel and `r K`-fold cross-validation to obtain a classification prediction model that is highly accurate (`r round(modFit$results[3,3]*100,1)`%) with a decent out-of-sample error (`r round(modFit$finalModel@error*100,2)`%).  We chose to compute the models by incorporating all subjects into one group because that provided a larger training set, which provides a lower in-sample error, and via cross-validation, a lower out-of-sample error.  Finally, we could have used linear discriminant analysis or random forests as prediction algorithms, but it is current thinking that SVM is more mathematically robust between the three, so we chose SVM with good results. 
