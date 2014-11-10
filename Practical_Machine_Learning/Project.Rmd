@@ -1,0 +1,100 @@
+---
+title: "Accelerometer Measured Activity Analysis"
+author: "lytemar"
+output: html_document
+---
+
+``` {r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, error=FALSE)
+```
+
+``` {r libraries, include=FALSE}
+library(plyr)
+library(caret)
+library(lubridate)
+library(ggplot2)
+library(kernlab)
+library(e1071)
+```
+
+``` {r read_in_data, include=FALSE, cache=TRUE}
+# Read in the training and test sets
+testing <- read.csv("pml-testing.csv")
+training <- read.csv("pml-training.csv")
+```
+
+```{r pre_processing, include=FALSE}
+# Remove all avg, stddev, kurtosis, skewness, max, min, amplitude and var columns
+# Also remove the X, various time stamps and window columns
+kurtosisCols <- grep("^kurt", names(training))
+avgCols <- grep("^avg", names(training))
+stddevCols <- grep("^stddev", names(training))
+varCols <- grep("^var", names(training))
+skewnessCols <- grep("^skewness", names(training))
+maxCols <- grep("^max", names(training))
+minCols <- grep("^min", names(training))
+ampCols <- grep("^amp", names(training))
+totalCols <- grep("^total", names(training))
+timestampCols <- grep("timestamp", names(training))
+windowCols <- grep("window", names(training))
+removeCols <- c(kurtosisCols, avgCols, stddevCols, varCols, skewnessCols,
+                maxCols, minCols, ampCols, totalCols, timestampCols, windowCols, 1)
+trainingRed <- training[,-removeCols]
+kurtosisCols <- grep("^kurt", names(testing))
+avgCols <- grep("^avg", names(testing))
+stddevCols <- grep("^stddev", names(testing))
+varCols <- grep("^var", names(testing))
+skewnessCols <- grep("^skewness", names(testing))
+maxCols <- grep("^max", names(testing))
+minCols <- grep("^min", names(testing))
+ampCols <- grep("^amp", names(testing))
+totalCols <- grep("^total", names(testing))
+timestampCols <- grep("timestamp", names(testing))
+windowCols <- grep("window", names(testing))
+removeCols <- c(kurtosisCols, avgCols, stddevCols, varCols, skewnessCols,
+                maxCols, minCols, ampCols, totalCols, timestampCols, windowCols, 1)
+testingRed <- testing[,-removeCols]
+
+# Remove the user name from the data
+trainingRed2 <- trainingRed
+testingRed2 <- testingRed
+trainingRed2$user_name <- NULL
+testingRed2$user_name <- NULL
+```
+
+``` {r training_chunk, cache=TRUE}
+# Begin support vector machine fit with K-fold corss-validation
+K = 10 # number of folds for cross-validation
+ctrl <- trainControl(method="cv", number = K, savePred=T)
+set.seed(12345)
+modFit <- train(classe ~ ., data=trainingRed2, method='svmRadial',
+                  preProc=c("center", "scale"), trControl = ctrl)
+```
+
+# Purpose
+The purpose of this document is to predict how well several people did barbell lifts using data from accelerometers on their belt, forearm, arm and dumbell in use.  The participants were asked to perform barbell lifts correctly and incorrectly in `r length(unique(training$classe))` different ways.  Thus, the goal is to train a model to predict which of the r length(unique(training$classe))` different ways the exercise was performed.
+
+# Data Reduction
+The training and test sets contain raw data as well as summary statistics of the raw data.  The summary statistics, average, variance, standard deviation, skewness, kurtosis, minimum, maximum, total and amplitude have been removed for modelling purposes as most of the entries of these summary columns are NA.  Additionally, the various non-numeric features, such as the time stamps, X, new_window, and user_name have been removed as they are inconsequential to model formation.  From this data reduction, the amount of columns in each data set is reduced from `r ncol(training)` to `r ncol(trainingRed2)`.
+
+# Prediction Algorithm and Results
+The build the prediction model, we center and scale the predictor variables to normalize them, then we feed them into a support vector machine (SVM) with radial basis functions and `r K`-fold cross-validation.  Using SVM with cross-validation provides robust classification, and we know that the estimate of the out-of-sample error by computing the training error is quite a good estimate (see any statistical learning reference for proof).  From this, we expect that the training error should be less that 10%, where more than 10% error would be a poor classifier in my humble opinion.
+
+The figures below show the results of the model prediction giving the best final model:
+
+``` {r}
+     modFit
+     modFit$finalModel
+```
+
+From these results, we obtain our estimate for the out-of-sample error listed as the training error (`r round(modFit$finalModel@error*100,2)`%).  Next, we plot the model fit to show how the training accuracy varies with the svm penalty cost parameter, which is varied automatically by the svm algorithm.
+
+``` {r}
+     p <- ggplot(modFit)
+     p <- p + ggtitle("SVM Training Accuracy Vs. Cost")
+     print(p)
+```
+
+# Conclusion
+In conclusion, we used SVM with radial basis function kernel and `r K`-fold cross-validation to obtain a classification prediction model that is highly accurate (`r round(modFit$results[3,3]*100,1)`%) with a decent out-of-sample error )`r round(modFit$finalModel@error*100,2)`%).  We chose to compute the models by incorporating all subjects into one group because that provided a larger training set, which provides a lower in-sample error, and via cross-validation, a lower out-of-sample error.  Finally, we could have used linear discriminant analysis or random forests as prediction algorithms, but it is current thinking that SVM is more mathematically robust between the three, so we chose SVM with good results. 
