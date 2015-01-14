@@ -1,0 +1,6 @@
+---
+title: "Help Documentation for Let's Root Root Root for the Numbers!"
+output: html_document
+---
+
+This application uses the bisection method to determine an nth root of a number to a desired accuracy.  The base number for which the root is to be determined can be positive or negative, but if an even root is requested for a negative number, the result **Nope** is returned.  Once all of the inputs are entered, press the **Go!** button and the result will appear on the right hand side of the frame.
