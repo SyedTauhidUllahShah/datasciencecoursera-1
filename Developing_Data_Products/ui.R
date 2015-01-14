@@ -7,7 +7,7 @@ shinyUI(pageWithSidebar(
           numericInput("power", "Desired (nth) Root", 2, min = 2, max = 4, step = 1),
           numericInput(inputId="epsilon", label="Desired Accuracy",value=0.001),
           actionButton("goButton", "Go!"),
-          h5("Help", a("Link", href="https://github.com/lytemar/datasciencecoursera/blob/master/Developing_Data_Products/apphelp.Rmd"))
+          h5(a("Help", href="https://github.com/lytemar/datasciencecoursera/blob/master/Developing_Data_Products/apphelp.Rmd"))
           ),
      mainPanel(
           h5('Base Number'),
