@@ -1,0 +1,55 @@
+Why Let's Root Root Root for the Numbers is Cool!
+========================================================
+author: lytemar
+date: `r format(Sys.Date(), format = "%B %d %Y")`
+transition: rotate
+
+About the App
+========================================================
+
+- *Let's Root Root Root for the Numbers* is an app that illustrates the use of the bisection method to calculate $n$ th roots of numbers
+- This app is cool because
+     - One can adjust the desired accuracy
+     - It illustrates the use of a simple yet robust algorithm
+     - Who really wants to take the easy way out and calculate the root of $x$ as $x^{1/n}$?
+
+Algorithm
+========================================================
+
+- Bisection algorithm heuristics for calculating $x^{1/n}$ ot accuracy $\epsilon$
+     - Check if even powered root of negative number is taken and return **Nope** if so
+     - Divide the interval $[0,x]$ in half to get $g$
+     - Check if $g^n - x < \epsilon$
+          - If so, give $g$ as the result
+          - Otherwise, divide the appropriate half interval in half again
+     - Repeat until $g^n - x < \epsilon$
+
+Function Code
+========================================================
+<small>
+```{r}
+computeRoot <- function(x, power, epsilon) {
+     if ((x < 0) & (power %% 2 == 0)) return("Nope")
+     # can't find even powered root of negative number
+     low = min(1, x)
+     high = max(1, x)
+     ans = (high+low)/2
+     while (abs(ans^power - x) > epsilon) {
+          if (ans^power < x) low <- ans
+               else high <- ans
+          ans = (high+low)/2
+          }
+     return(ans)
+}
+```
+</small>
+
+Function Evaluation and Conclusions
+====
+``` {r}
+
+# 5-th root of 29 to .0001 accuracy
+computeRoot(29, 5, .0001)
+```
+
+- Sure, anyone can evaluate this as `r 29^(1/5)`, but why not reinvent the wheel?  It is fun.
