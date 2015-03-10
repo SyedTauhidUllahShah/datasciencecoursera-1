@@ -14,3 +14,16 @@ txtNews <- readLines(conNews)
 close(conNews)
 txtTwitter <- readLines(conTwitter)
 close(conTwitter)
+
+# Longest line in each file
+maxLgBlogs <- max(nchar(txtBlogs[1:length(txtBlogs)]))
+maxLgNews <- max(nchar(txtNews[1:length(txtNews)]))
+maxLgTwitter <- max(nchar(txtTwitter[1:length(txtTwitter)]))
+
+# find "love" and "hate" in the en_Us.twitter data set
+loveTwitter = length(grep("love",txtTwitter))
+hateTwitter = length(grep("hate",txtTwitter))
+ratio = loveTwitter/hateTwitter
+
+# line in twitter that had "biostats" says
+biostatsTwitterLine = txtTwitter[grep("biostats",txtTwitter)]
