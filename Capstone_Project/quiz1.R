@@ -27,3 +27,6 @@ ratio = loveTwitter/hateTwitter
 
 # line in twitter that had "biostats" says
 biostatsTwitterLine = txtTwitter[grep("biostats",txtTwitter)]
+
+# long line grep
+Tweet1 <- length(grep("A computer once beat me at chess, but it was no match for me at kickboxing", txtTwitter))
