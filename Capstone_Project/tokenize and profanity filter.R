@@ -1,7 +1,8 @@
 # Function to tokenize and filter profanity form the text
 
 Tokenize <- function(fileStr, n =-1L) {
-     require(qdap, quietly = TRUE)
+     require(qdap, quietly = TRUE, warn.conflicts = FALSE)
+     require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
      #require(tm, quietly = TRUE)
      
      fileDir <- "~/Documents/School/Coursera Data Science/Capstone Project/final/en_US/"
@@ -16,6 +17,18 @@ Tokenize <- function(fileStr, n =-1L) {
      
      # conert all text to lower case
      lines <- tolower(lines)
+     
+     # Profanity filtering - set all profanity to EXPLICATIVE
+     profanityFound = c("shit", "asshole", "fuck", "fucking", "cunt", "damn",
+                        "bitch", "cock sucker", "dickhead", "dick head",
+                        "mother fucker", "fucker")
+     lines <- mgsub(profanityFound, "EXPLICATIVE", lines)
+     
+     # replace unicode symbols
+     unicodeFound <- c("\u2019","\u201D","\u201C","\U0001f466",
+                       "\u0093i\u0092m", "\u0094","\u0093i")
+     unicodeRepl <- c("'","","","","","","")
+     lines <- mgsub(unicodeFound, unicodeRepl, lines)
      
      # formal prefix abbreviations
      prefixesFound <- c("mr.", "sr.", "jr.", "fr.")
@@ -34,10 +47,22 @@ Tokenize <- function(fileStr, n =-1L) {
      lines <- mgsub(numOrderFound, numOrderRepl, lines)
      
      # split the lines by punctuation (except apostrophe) and unlist
-     words = unlist(strsplit(lines, "(?!')[[:punct:]]|[[:space:]]", perl = T))   
+     words = unlist(strsplit(lines, "(?!')[[:punct:]]|[[:space:]]", perl = T))
+     
+     # replace short abbreviations
+#      abrevFound <- c("(?i)(?=.*\\brt\\b)", "(?i)(?=.*\\br\\b)",
+#                      "(?i)(?=.*\\bu\\b)")
+#      abrevRepl <- c("right","are","you")
+#      for (i in length(abrevFound)) {
+#           words <- gsub(abrevFound[i],abrevRepl[i],words,perl=TRUE)
+#      }
 
-     # remove all ""
+     # remove all "" and NAs
      words <- words[words != ""]
+     words <- words[!is.na(words)]
+
+     # stem the words
+     words <- stemmer(words, warn = FALSE)
      
      # Number of tokens
      tokens = length(words)
@@ -57,6 +82,6 @@ Tokenize <- function(fileStr, n =-1L) {
      return(resultList)
 }
 
-tokenizedBlogs <- Tokenize("en_US.blogs.txt", 10)
-tokenizedNews <- Tokenize("en_US.news.txt", 10)
-tokenizedTwitter <- Tokenize("en_US.twitter.txt", 10)
+tokenizedBlogs <- Tokenize("en_US.blogs.txt", 25)
+tokenizedNews <- Tokenize("en_US.news.txt", 25)
+tokenizedTwitter <- Tokenize("en_US.twitter.txt", 25)
