@@ -87,6 +87,6 @@ Tokenize <- function(fileStr, n =-1L) {
      return(resultList)
 }
 
-tokenizedBlogs <- Tokenize("en_US.blogs.txt", 25)
-tokenizedNews <- Tokenize("en_US.news.txt", 25)
-tokenizedTwitter <- Tokenize("en_US.twitter.txt", 25)
+tokenizedBlogs <- Tokenize("en_US.blogs.txt")
+tokenizedNews <- Tokenize("en_US.news.txt")
+tokenizedTwitter <- Tokenize("en_US.twitter.txt")
