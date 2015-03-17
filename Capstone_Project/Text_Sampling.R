@@ -33,3 +33,10 @@ textSample <- function(fileStr, nLines, p = .25){
      writeLines(lines, con)
      close(con)
 }
+
+# sampling probability
+p = .05
+
+textSample("en_US.twitter.txt", numLinesTwitter, p)
+textSample("en_US.news.txt", numLinesNews, p)
+textSample("en_US.blogs.txt", numLinesBlogs, p)
