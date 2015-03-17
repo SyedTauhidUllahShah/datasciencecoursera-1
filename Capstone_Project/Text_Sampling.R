@@ -24,7 +24,7 @@ textSample <- function(fileStr, nLines, p = .25){
      # Generate random sample
      set.seed(12321)
      samples <- rbinom(n = nLines, size = 1, prob = p)
-     lines <- lines[samples]
+     lines <- lines[which(samples==1)]
 
      # write the lines to a file
      filePath <- paste0(fileDir,"sampled/",fileStr)
@@ -35,7 +35,7 @@ textSample <- function(fileStr, nLines, p = .25){
 }
 
 # sampling probability
-p = .05
+p = .1
 
 textSample("en_US.twitter.txt", numLinesTwitter, p)
 textSample("en_US.news.txt", numLinesNews, p)
