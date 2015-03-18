@@ -17,6 +17,9 @@ library(plyr)
 ``` {r tokenize_data, include=FALSE, cache=TRUE}
 # Read in and tokenize the datasets
 source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize and profanity filter.R')
+tokenizedBlogs <- Tokenize("en_US.blogs.txt")
+tokenizedNews <- Tokenize("en_US.news.txt")
+tokenizedTwitter <- Tokenize("en_US.twitter.txt")
 ```
 
 You can also embed plots, for example:
