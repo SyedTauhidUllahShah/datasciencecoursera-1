@@ -1,0 +1,146 @@
+
+---
+title: "Exploratory Data Analysis for Natural Language Processing"
+output: 
+     html_document:
+          pandoc_args: [
+               "+RTS", "-k64m",
+               "-RTS"
+          ]
+---
+
+``` {r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, error=FALSE)
+```
+
+``` {r libraries, include=FALSE}
+library(plyr)
+library(tm)
+library(RWeka)
+library(pryr)
+library(ggplot2)
+```
+
+``` {r read_in_full_data, include=FALSE, cache=TRUE}
+# Read in and tokenize the datasets
+source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/clean_and_filter.R')
+
+rawFiles = c("en_US.twitter.txt", "en_US.news.txt", "en_US.blogs.txt")
+fileDir <- "~/Documents/School/Coursera Data Science/Capstone Project/final/en_US/"
+rawFileList <- list()
+rawNcharList <- list()
+for (i in rawFiles){
+     filePath <- paste0(fileDir, i)
+     # create a connection for the file
+     con <- file(filePath, open="r")
+     
+     # read in the lines and close the connection
+     rawFileList[[i]] <- readLines(con) 
+     close(con)
+}
+```
+
+``` {r clean_and_filter_data, include=FALSE, cache=TRUE}
+US.path <- paste0(fileDir,"sampled/en_US.txt")
+cleanedCombined <- clean_and_filter(US.path)
+Blogs.path <- paste0(fileDir,"sampled/en_US.blogs.txt")
+cleanedBlogs <- clean_and_filter(Blogs.path)
+News.path <- paste0(fileDir,"sampled/en_US.news.txt")
+cleanedNews <- clean_and_filter(News.path)
+Twitter.path <- paste0(fileDir,"sampled/en_US.twitter.txt")
+cleanTwitter <- clean_and_filter(Twitter.path)
+```
+
+``` {r tokenize_combined_data, include=FALSE, cache=TRUE}
+source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
+tokenCombined <- Tokenize(cleanedCombined)
+```
+
+``` {r tokenize_blogs_data, include=FALSE, cache=TRUE}
+source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
+tokenBlogs <- Tokenize(cleanedBlogs)
+```
+
+``` {r tokenize_news_data, include=FALSE, cache=TRUE}
+source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
+tokenNews <- Tokenize(cleanedNews)
+```
+
+``` {r tokenize_twitter_data, include=FALSE, cache=TRUE}
+source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
+tokenTwitter <- Tokenize(cleanTwitter)
+```
+
+``` {r summary_sampled_data, include=FALSE, cache=TRUE}
+# Create summary data tables for each type of n-gram
+FileList <- c("Blogs", "News", "Twitter", "Combined")
+WordVals <- c(tokenBlogs$NGramCounts$Total.Count[1],
+                 tokenNews$NGramCounts$Total.Count[1], 
+               tokenTwitter$NGramCounts$Total.Count[1],
+               tokenCombined$NGramCounts$Total.Count[1])
+TwoGramVals <- c(tokenBlogs$NGramCounts$Total.Count[2],
+               tokenNews$NGramCounts$Total.Count[2], 
+               tokenTwitter$NGramCounts$Total.Count[2],
+               tokenCombined$NGramCounts$Total.Count[2])
+ThreeGramVals <- c(tokenBlogs$NGramCounts$Total.Count[3],
+               tokenNews$NGramCounts$Total.Count[3], 
+               tokenTwitter$NGramCounts$Total.Count[3],
+               tokenCombined$NGramCounts$Total.Count[3])
+FourGramVals <- c(tokenBlogs$NGramCounts$Total.Count[4],
+               tokenNews$NGramCounts$Total.Count[4], 
+               tokenTwitter$NGramCounts$Total.Count[4],
+               tokenCombined$NGramCounts$Total.Count[4])
+WordsSummary <- data.frame(FileList, WordVals)
+colnames(WordsSummary) <- c("Dataset", "Total_words")
+TwoGramSummary <- data.frame(FileList, TwoGramVals)
+colnames(TwoGramSummary) <- c("Dataset", "Total_2_grams")
+ThreeGramSummary <- data.frame(FileList, ThreeGramVals)
+colnames(ThreeGramSummary) <- c("Dataset", "Total_3_grams")
+FourGramSummary <- data.frame(FileList, FourGramVals)
+colnames(FourGramSummary) <- c("Dataset", "Total_4_grams")
+```
+
+# Introduction
+The purpose of this report is to detail initial exploratory data analysis of a corpus of English text obtained from some Twitter feeds, blog posts, and news articles.  We will analyze the makeup of the source corpora, and we will describe the tokenization of (smaller) sampled data sets from the original corpus.
+
+# Exploratory Data Analysis
+The corpus is set of large text files consisting of lines of text separated by carriage return, or newline, characters.  The size of the data set is
+
+``` {r, cache=TRUE}
+for (i in 1:length(rawFiles)) {
+     print(paste0("File ", names(rawFileList[i]), " has size ",
+           object_size(rawFileList[i]), " bytes containing ",
+           length(rawFileList[[i]]), " lines of text."))
+}
+```
+
+Since this data set is so large, we will not count the number of words, or n-grams.  Instead, we will generate a smaller data set using binomial sampling with p=.025 (2.5%), followed by combining the three sampled files into one file.  Given the size of the original data set, this sampled data set adequately represents the population.  Thus, our exploratory data analysis will consist of a deep dive into the sampled data.
+
+## Tokenization of the Sampled Dataset
+Tokenization of the data set consists of the following steps:
+
+1. Replace profane words with the word EXPLICATIVE.
+1. Remove all punctuation.
+1. Remove all (known) Unicode characters.
+1. Remove all whitespace.
+1. Replace ordered numbers, e.g., 1st, with the word form, e.g., first.
+1. Replace abbreviations and contractions with the expanded form.
+1. Convert all words to lowercase.
+
+Following this tokenization procedure, we found the n-grams (n=1,2,3,4) and tallied the total of each type of n-gram.  The following tables shows the total number of n-grams found.
+
+``` {r NGramSummary}
+WordsSummary
+TwoGramSummary
+ThreeGramSummary
+FourGramSummary
+```
+
+Additionally, we have the following charts that show which n-grams are most frequent:
+
+``` {r NGramCharts}
+# Plot the top twenty for each n-gram
+# OneGmPlot <- ggplot(tokenizedTxt$unique1grams, aes(x=tokenizedTxt$unique1grams[1],y=tokenizedTxt$unique1grams[2])) + geom_bar() + coord_flip()
+# print(OneGmPlot)
+```
