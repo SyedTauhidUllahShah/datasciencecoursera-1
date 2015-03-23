@@ -39,6 +39,12 @@ Tokenize <- function(data) {
      uniqueThreeGrams <- data.frame(table(ThreeGrams))
      uniqueFourGrams <- data.frame(table(FourGrams))
      
+     # Sort by frequency in descending order
+     uniqueWords <- uniqueWords[order(uniqueWords[,2],decreasing=TRUE),]
+     uniqueTwoGrams <- uniqueTwoGrams[order(uniqueTwoGrams[,2],decreasing=TRUE),]
+     uniqueThreeGrams <- uniqueThreeGrams[order(uniqueThreeGrams[,2],decreasing=TRUE),]
+     uniqueFourGrams <- uniqueFourGrams[order(uniqueFourGrams[,2],decreasing=TRUE),]
+     
      gramNames <- c("Words", "TwoGrams", "ThreeGrams", "FourGrams")
      gramVals <-c(numWords, numTwoGrams, numThreeGrams, numFourGrams)
      

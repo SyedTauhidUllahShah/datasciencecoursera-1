@@ -91,14 +91,10 @@ FourGramVals <- c(tokenBlogs$NGramCounts$Total.Count[4],
                tokenNews$NGramCounts$Total.Count[4], 
                tokenTwitter$NGramCounts$Total.Count[4],
                tokenCombined$NGramCounts$Total.Count[4])
-WordsSummary <- data.frame(FileList, WordVals)
-colnames(WordsSummary) <- c("Dataset", "Total_words")
-TwoGramSummary <- data.frame(FileList, TwoGramVals)
-colnames(TwoGramSummary) <- c("Dataset", "Total_2_grams")
-ThreeGramSummary <- data.frame(FileList, ThreeGramVals)
-colnames(ThreeGramSummary) <- c("Dataset", "Total_3_grams")
-FourGramSummary <- data.frame(FileList, FourGramVals)
-colnames(FourGramSummary) <- c("Dataset", "Total_4_grams")
+GramSummary <- data.frame(FileList, WordVals, TwoGramVals, ThreeGramVals,
+                           FourGramVals)
+colnames(GramSummary) <- c("Dataset", "Total.Words", "Total.Two.Grams",
+                            "Total.Three.Grams", "Total.Four.Grams")
 ```
 
 # Introduction
@@ -128,19 +124,57 @@ Tokenization of the data set consists of the following steps:
 1. Replace abbreviations and contractions with the expanded form.
 1. Convert all words to lowercase.
 
-Following this tokenization procedure, we found the n-grams (n=1,2,3,4) and tallied the total of each type of n-gram.  The following tables shows the total number of n-grams found.
+Following this tokenization procedure, we found all of the n-grams (n=1,2,3,4) and tallied the total count of each type of n-gram.  The following table shows the total counts of n-grams:
 
-``` {r NGramSummary}
-WordsSummary
-TwoGramSummary
-ThreeGramSummary
-FourGramSummary
+``` {r NGramSummary, results='asis', cache=TRUE}
+kable(GramSummary, format = 'markdown')
 ```
 
 Additionally, we have the following charts that show which n-grams are most frequent:
 
-``` {r NGramCharts}
+``` {r NGramCharts, cache=TRUE}
 # Plot the top twenty for each n-gram
-# OneGmPlot <- ggplot(tokenizedTxt$unique1grams, aes(x=tokenizedTxt$unique1grams[1],y=tokenizedTxt$unique1grams[2])) + geom_bar() + coord_flip()
-# print(OneGmPlot)
+WordsToPlot <- as.data.frame(tokenCombined$uniqueWords[1:20,])
+TwoGramsToPlot <- as.data.frame(tokenCombined$uniqueTwoGrams[1:20,])
+ThreeGramsToPlot <- as.data.frame(tokenCombined$uniqueThreeGrams[1:20,])
+FourGramsToPlot <- as.data.frame(tokenCombined$uniqueFourGrams[1:20,])
+
+WordPlot <- ggplot(data=WordsToPlot, aes(x=words,y=Freq))
+WordPlot <- WordPlot + geom_bar(stat="identity", fill = "blue") + coord_flip()
+WordPlot <- WordPlot + xlab("Word") + ylab("count")
+WordPlot <- WordPlot + ggtitle("Top Twenty Most Frequent Words")
+WordPlot <- WordPlot + theme(axis.text.x = element_text(angle=270, hjust=1, vjust=0.5))
+print(WordPlot)
+ 
+TwoGramPlot <- ggplot(TwoGramsToPlot, aes(x=TwoGrams,y=Freq))
+TwoGramPlot <- TwoGramPlot + geom_bar(stat="identity", fill="red") + coord_flip()
+TwoGramPlot <- TwoGramPlot + xlab("2-Gram") + ylab("count")
+TwoGramPlot <- TwoGramPlot + ggtitle("Top Twenty Most Frequent 2-Grams")
+TwoGramPlot <- TwoGramPlot + theme(axis.text.x = element_text(angle=270, hjust=1, vjust=0.5))
+print(TwoGramPlot)
+
+ThreeGramPlot <- ggplot(ThreeGramsToPlot, aes(x=ThreeGrams,y=Freq))
+ThreeGramPlot <- ThreeGramPlot + geom_bar(stat="identity", fill="green") + coord_flip()
+ThreeGramPlot <- ThreeGramPlot + xlab("3-Gram") + ylab("count")
+ThreeGramPlot <- ThreeGramPlot + ggtitle("Top Twenty Most Frequent 3-Grams")
+ThreeGramPlot <- ThreeGramPlot + theme(axis.text.x = element_text(angle=270, hjust=1, vjust=0.5))
+print(ThreeGramPlot)
+
+FourGramPlot <- ggplot(FourGramsToPlot, aes(x=FourGrams,y=Freq))
+FourGramPlot <- FourGramPlot + geom_bar(stat="identity", fill="black") + coord_flip()
+FourGramPlot <- FourGramPlot + xlab("4-Gram") + ylab("count")
+FourGramPlot <- FourGramPlot + ggtitle("Top Twenty Most Frequent 4-Grams")
+FourGramPlot <- FourGramPlot + theme(axis.text.x = element_text(angle=270, hjust=1, vjust=0.5))
+print(FourGramPlot)
 ```
+
+From these charts, we see that the higher the order of the n-gram, the flatter the distribution, i.e., the peak count decreases as n increases.
+
+# Prediction Modeling
+To develop the language prediction model, we will develop a Markov chain model which will use n-grams to predict the next word in the sequence.  From the sampled data above, we will be able to compute the probability of each word and n-gram (up to n=4).  However, we will need to compress the data so that the size of the model becomes useable.  Some techniques for data compression are
+
+- Stemming,
+- Removing stop words, and
+- Decreasing the sample size.
+
+Each of these techniques will be investigated to determine their effectiveness for data compression and prediction accuracy.  For the probability model, we will most likely use Katz' back-off model with Good-Turing smoothing and cross-validation, which will drive the Markov prediction algorithm.
