@@ -1,7 +1,35 @@
 # Function to tokenize and filter profanity form the text
 
+# Function to convert ngrams into dataframe with column for each word
+ngramToMatrix <- function(dataVec, fromVec, toVec){
+     require(plyr, quietly = TRUE, warn.conflicts = FALSE)
+     # assume that data is a character vector
+     line <- character()
+     for (i in 1:length(dataVec)){
+          line[i] <- strsplit(dataVec[i], split = " ")   
+     }
+     tempMat <- do.call("rbind", line)
+     result = matrix(nrow=nrow(tempMat), ncol=ncol(tempMat))
+     for (j in 1:ncol(tempMat)) {
+          result[,j] <- mapvalues(tempMat[,j], from = fromVec,
+                                  to=toVec, warn_missing=FALSE)
+     }
+     result <- apply(result, 2, as.integer)
+     return(result)    
+}
+
+GramWordsToInts <- function(df, fromVec, toVec) {
+     # Take the n-gram words and convert to integer matrix with frequencies
+     # as the last column
+     encodeGram <- ngramToMatrix(df[,1], fromVec, toVec)
+     result <- cbind(encodeGram, as.integer(df[,2]))
+     result <- result[rowSums(is.na(result))==0,]
+     return(result)
+}
+
 Tokenize <- function(data) {
-     #require(qdap, quietly = TRUE, warn.conflicts = FALSE)
+     require(qdap, quietly = TRUE, warn.conflicts = FALSE)
+     require(plyr, quietly = TRUE, warn.conflicts = FALSE)
      #require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
      #require(tm, quietly = TRUE, warn.conflicts = FALSE)
      #require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
@@ -21,9 +49,17 @@ Tokenize <- function(data) {
      gramsList = sapply(gregexpr("\\w+", grams), length)
      
      words <- grams[gramsList == 1]
+     words <- as.character(words)
      TwoGrams <- grams[gramsList == 2]
+     TwoGrams <- as.character(TwoGrams)
      ThreeGrams <- grams[gramsList == 3]
+     ThreeGrams <- as.character(ThreeGrams)
      FourGrams <- grams[gramsList == 4]
+     FourGrams <- as.character(FourGrams)
+
+     # Remove the original grams from memory
+     rm(grams)
+     rm(gramsList)
 
      # Number of tokens
      #tokens = length(words)
@@ -33,56 +69,69 @@ Tokenize <- function(data) {
      numFourGrams = length(FourGrams)
 
      # create data frame listing the number of occurrences of each word
-     #uniqueWords <- data.frame(table(words))
      uniqueWords <- data.frame(table(words))
+     uniqueWords$words <- as.character(uniqueWords$words)
      uniqueTwoGrams <- data.frame(table(TwoGrams))
+     uniqueTwoGrams$TwoGrams <- as.character(uniqueTwoGrams$TwoGrams)
      uniqueThreeGrams <- data.frame(table(ThreeGrams))
+     uniqueThreeGrams$ThreeGrams <- as.character(uniqueThreeGrams$ThreeGrams)
      uniqueFourGrams <- data.frame(table(FourGrams))
+     uniqueFourGrams$FourGrams <- as.character(uniqueFourGrams$FourGrams)
      
      # Sort by frequency in descending order
      uniqueWords <- uniqueWords[order(uniqueWords[,2],decreasing=TRUE),]
      uniqueTwoGrams <- uniqueTwoGrams[order(uniqueTwoGrams[,2],decreasing=TRUE),]
      uniqueThreeGrams <- uniqueThreeGrams[order(uniqueThreeGrams[,2],decreasing=TRUE),]
      uniqueFourGrams <- uniqueFourGrams[order(uniqueFourGrams[,2],decreasing=TRUE),]
-     
+
+     # Add row index to the uniqueWords list
+     uniqueWords$ID <- as.integer(1:nrow(uniqueWords))
+
      gramNames <- c("Words", "TwoGrams", "ThreeGrams", "FourGrams")
      gramVals <-c(numWords, numTwoGrams, numThreeGrams, numFourGrams)
      
      dfCounts <- data.frame()
      dfCounts <- data.frame(gramNames, gramVals)
      colnames(dfCounts) <- c("n.gram.type", "Total.Count")
+
+     # Get Frequecy of Frequencies tables
+     FreqOfFreqWords = ddply(uniqueWords, .(Freq), summarize,
+                        Nr = length(Freq))
+     FreqOfFreqTwoGrams = ddply(uniqueTwoGrams, .(Freq), summarize,
+                           Nr = length(Freq))
+     FreqOfFreqThreeGrams = ddply(uniqueThreeGrams, .(Freq), summarize,
+                             Nr = length(Freq))
+     FreqOfFreqFourGrams = ddply(uniqueFourGrams, .(Freq), summarize,
+                            Nr = length(Freq))
+
+
+     # Convert ngrams to matrices of integers
+     rm(words)
+     rm(TwoGrams)
+     rm(ThreeGrams)
+     rm(FourGrams)
      
-     resultList <- list("Words" = words, "TwoGrams" = TwoGrams,
-                        "ThreeGrams" = ThreeGrams, "FourGrams" = FourGrams,
-                        "NGramCounts" = dfCounts,
+     TGramMat <- GramWordsToInts(uniqueTwoGrams, uniqueWords$words,
+                            uniqueWords$ID)
+     uniqueTwoGrams <- TGramMat
+     TGramMat <- GramWordsToInts(uniqueThreeGrams, uniqueWords$words,
+                            uniqueWords$ID)
+     uniqueThreeGrams <- TGramMat
+     TGramMat <- GramWordsToInts(uniqueFourGrams, uniqueWords$words,
+                            uniqueWords$ID)
+     uniqueFourGrams <- TGramMat
+     rm(TGramMat)
+
+     resultList <- list("NGramCounts" = dfCounts,
+                        "FreqOfFreqWords" = FreqOfFreqWords,
+                        "FreqOfFreqTwoGrams" = FreqOfFreqTwoGrams,
+                        "FreqOfFreqThreeGrams" = FreqOfFreqThreeGrams,
+                        "FreqOfFreqFourGrams" = FreqOfFreqFourGrams,
                         "uniqueWords" = uniqueWords,
                         "uniqueTwoGrams" = uniqueTwoGrams,
                         "uniqueThreeGrams" = uniqueThreeGrams,
                         "uniqueFourGrams" = uniqueFourGrams)
      
-#      data <- VCorpus(VectorSource(data))
-#      data <- tm_map(data, stripWhitespace)
-#      dtm_uni <- DocumentTermMatrix(data)
-#      dtm_bi <- DocumentTermMatrix(data, control = list(tokenize=BigramTokenizer))
-#      dtm_tri <- DocumentTermMatrix(data, control = list(tokenize=TrigramTokenizer))
-#      dtm_quad <- DocumentTermMatrix(data, control = list(tokenize=QuadgramTokenizer))
-#      numWords <- sum(rowSums(as.matrix(dtm_uni)))
-#      numTwoGrams <- sum(rowSums(as.matrix(dtm_bi)))
-#      numThreeGrams <- sum(rowSums(as.matrix(dtm_tri)))
-#      numFourGrams <- sum(rowSums(as.matrix(dtm_quad)))
-# 
-#      gramNames <- c("Words", "TwoGrams", "ThreeGrams", "FourGrams")
-#      gramVals <-c(numWords, numTwoGrams, numThreeGrams, numFourGrams)
-#      
-#      dfCounts <- data.frame()
-#      dfCounts <- data.frame(gramNames, gramVals)
-#      colnames(dfCounts) <- c("N.Gram.Type", "Total.Count")
-# 
-#      resultList <- list("wordDTM" = dtm_uni,
-#                         "twoGramDTM" = dtm_bi,
-#                         "threeGramDTM" = dtm_tri,
-#                         "fourGramDTM" = dtm_quad,
-#                         "NGramCounts" = dfCounts)
-
      return(resultList)
 }
+
