@@ -32,34 +32,24 @@ Tokenize <- function(data) {
      require(plyr, quietly = TRUE, warn.conflicts = FALSE)
      #require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
      #require(tm, quietly = TRUE, warn.conflicts = FALSE)
-     #require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
+     require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
      
      # Functions for 2-gram through 4-gram tokenizers
-#      TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
-#      BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
-#      QuadgramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 4, max = 4))
+     TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+     BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+     QuadgramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 4, max = 4))
+     WordTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
+     QuintgramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 5, max = 5))
+     
      
      # split the data by punctuation (except apostrophe) and unlist
      #words = unlist(strsplit(data, "(?!')[[:punct:]]|[[:space:]]", perl = T))
      #words = MC_tokenizer(data)
      
-     # determine where the ngrams (up to n=4) lie
-     z <- ngrams(data, n=4)
-     grams <- unlist(z$raw)
-     gramsList = sapply(gregexpr("\\w+", grams), length)
-     
-     words <- grams[gramsList == 1]
-     words <- as.character(words)
-     TwoGrams <- grams[gramsList == 2]
-     TwoGrams <- as.character(TwoGrams)
-     ThreeGrams <- grams[gramsList == 3]
-     ThreeGrams <- as.character(ThreeGrams)
-     FourGrams <- grams[gramsList == 4]
-     FourGrams <- as.character(FourGrams)
-
-     # Remove the original grams from memory
-     rm(grams)
-     rm(gramsList)
+     words <- WordTokenizer(data)
+     TwoGrams <- BigramTokenizer(data)
+     ThreeGrams <- TrigramTokenizer(data)
+     FourGrams <- QuadgramTokenizer(data)
 
      # Number of tokens
      #tokens = length(words)
@@ -111,16 +101,21 @@ Tokenize <- function(data) {
      rm(ThreeGrams)
      rm(FourGrams)
      
-     TGramMat <- GramWordsToInts(uniqueTwoGrams, uniqueWords$words,
+     TwoGramMat <- GramWordsToInts(uniqueTwoGrams, uniqueWords$words,
                             uniqueWords$ID)
-     uniqueTwoGrams <- TGramMat
-     TGramMat <- GramWordsToInts(uniqueThreeGrams, uniqueWords$words,
+     uniqueTwoGrams <- as.data.frame(TwoGramMat)
+     rm(TwoGramMat)
+     colnames(uniqueTwoGrams)[3] <- "Freq"
+     ThreeGramMat <- GramWordsToInts(uniqueThreeGrams, uniqueWords$words,
                             uniqueWords$ID)
-     uniqueThreeGrams <- TGramMat
-     TGramMat <- GramWordsToInts(uniqueFourGrams, uniqueWords$words,
+     uniqueThreeGrams <- as.data.frame(ThreeGramMat)
+     rm(ThreeGramMat)
+     colnames(uniqueThreeGrams)[4] <- "Freq"
+     FourGramMat <- GramWordsToInts(uniqueFourGrams, uniqueWords$words,
                             uniqueWords$ID)
-     uniqueFourGrams <- TGramMat
-     rm(TGramMat)
+     uniqueFourGrams <- as.data.frame(FourGramMat)
+     rm(FourGramMat)
+     colnames(uniqueFourGrams)[5] <- "Freq"
 
      resultList <- list("NGramCounts" = dfCounts,
                         "FreqOfFreqWords" = FreqOfFreqWords,

@@ -1,17 +1,22 @@
 # Function to tokenize and filter profanity form the text
 
-clean_and_filter <- function(filePath, n =-1L) {
-     require(qdap, quietly = TRUE, warn.conflicts = FALSE)
-#      require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
-#      require(tm, quietly = TRUE, warn.conflicts = FALSE)
-#      require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
-     
+readLinesFile <- function(filePath, n=-1L){
      # create a connection for the file
      con <- file(filePath, open="r")
      
      # read in the lines and close the connection
      lines <- readLines(con, n=n) 
      close(con)
+     
+     return(lines)
+}
+
+clean_and_filter <- function(lines) {
+     require(qdap, quietly = TRUE, warn.conflicts = FALSE)
+     require(stringr, quietly = TRUE, warn.conflicts = FALSE)
+#      require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
+#      require(tm, quietly = TRUE, warn.conflicts = FALSE)
+#      require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
      
      # conert all text to lower case
      lines <- tolower(lines)
@@ -50,6 +55,11 @@ clean_and_filter <- function(filePath, n =-1L) {
      lines <- mgsub(numOrderFound, numOrderRepl, lines)
 
      lines <- gsub("'","", lines)
+
+     # Remove greek letters
+     lines <- gsub("[\u0370-\u03FF]|[\u1F00-\u1FFF]"," ", lines)
+
+     lines <- str_replace_all(lines, "[^[:alpha:]]", " ")
      
      return(lines)
 }

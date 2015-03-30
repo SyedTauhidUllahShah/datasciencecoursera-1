@@ -5,7 +5,7 @@
 #
 # Output lines contain the frequency r, and the SGT r*.
 #
-# To get the probability for an object see r>=1 times, divide r* by N.
+# To get the probability for an object seen r>=1 times, divide r* by N.
 
 nrzest <- function(r, nr){
      d <- c(1, diff(r))

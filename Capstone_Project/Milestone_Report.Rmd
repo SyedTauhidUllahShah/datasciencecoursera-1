@@ -43,13 +43,17 @@ for (i in rawFiles){
 
 ``` {r clean_and_filter_data, include=FALSE, cache=TRUE}
 US.path <- paste0(fileDir,"sampled/en_US.txt")
-cleanedCombined <- clean_and_filter(US.path)
+Combined <- readLinesFile(US.Path)
+cleanedCombined <- clean_and_filter(Combined)
 Blogs.path <- paste0(fileDir,"sampled/en_US.blogs.txt")
-cleanedBlogs <- clean_and_filter(Blogs.path)
+Blogs <- readLinesFile(Blogs.path)
+cleanedBlogs <- clean_and_filter(Blogs)
 News.path <- paste0(fileDir,"sampled/en_US.news.txt")
-cleanedNews <- clean_and_filter(News.path)
+News <- readLinesFile(News.path)
+cleanedNews <- clean_and_filter(News)
 Twitter.path <- paste0(fileDir,"sampled/en_US.twitter.txt")
-cleanTwitter <- clean_and_filter(Twitter.path)
+Twitter <- readLinesFile(Twitter.path)
+cleanTwitter <- clean_and_filter(Twitter)
 ```
 
 ``` {r tokenize_combined_data, include=FALSE, cache=TRUE}

@@ -35,7 +35,7 @@ textSample <- function(fileStr, nLines, p = .25){
 }
 
 # sampling probability
-p = .0025
+p = .025
 
 textSample("en_US.twitter.txt", numLinesTwitter, p)
 textSample("en_US.news.txt", numLinesNews, p)

@@ -1,18 +1,20 @@
 # Code to generate language prediction model
 
-# 1. clean and filter the data
-source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/clean_and_filter.R')
-fileDir <- "~/Documents/School/Coursera Data Science/Capstone Project/final/en_US/"
-US.path <- paste0(fileDir,"sampled/en_US.txt")
-#cleanedCombined <- clean_and_filter(US.path)
+# 1. Preprocess the data
+#source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/Regression_Model_PreProcessing.R')
 
-# 2. Tokenize to get words and n-grams
-source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
-#tokenCombined <- Tokenize(cleanedCombined)
+# 2. run a lit model fit
+fit <- lm(Y ~. + .^4, data <- TknRegGrams)
 
-# 3. Run simple Good-Turing to calculate the probabilities
-tokenCombinedProbs <- GTProbs(tokenCombined)
+#3. Predict a word after a 4-gram
+FourGramX <- as.data.frame(c("who", "can","it","be"))
+FourGramX[,1] <- as.character(FourGramX[,1])
+FourGramX <- GramsToInts(FourGramX,TknRegWordsDict$words, TknRegWordsDict$ID)
+Xdf <- data.frame()
+for (i in 1:length(FourGramX)){
+     Xdf[1,i] = FourGramX[i]
+}
 
-# 4. Use Katz back-off to compute conditional probabilities
-
-# 5. Compute the conditional expectation to make prediction
+colnames(Xdf) <- c("W1", "W2", "W3", "W4")
+Pred <- predict(fit, newdata = Xdf, type = "response")
+PredWord <- TknRegWordsDict$words[Pred]
