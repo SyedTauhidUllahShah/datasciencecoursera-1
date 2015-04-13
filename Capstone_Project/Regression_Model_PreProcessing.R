@@ -3,21 +3,25 @@
 # 4GB RAM for Java
 options(java.parameters = "-Xmx4g")
 
-source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/clean_and_filter.R')
-source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/Katz_back_off.R')
-source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/tokenize_file.R')
+projDir <- '~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/'
+setwd(projDir)
+source(paste0(projDir,'clean_and_filter_corpus.R'))
+source(paste0(projDir,'Katz_back_off.R'))
+source(paste0(projDir,'tokenize_file.R'))
 fileDir <- "~/Documents/School/Coursera Data Science/Capstone Project/final/en_US/"
 US.path <- paste0(fileDir,"sampled/en_US.txt")
 
 require(plyr, quietly = TRUE, warn.conflicts = FALSE)
 require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
+require(tm, quietly = TRUE, warn.conflicts = FALSE)
+require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
 
 # Read in the data and split into pieces
 cleanSplit <- readLinesFile(US.path)
 cleanSplit <- split(cleanSplit, cut(1:length(cleanSplit), 10, labels=FALSE))
 
 # Clean and filter the data
-cleanedData <- lapply(cleanSplit, function(x) clean_and_filter(x))
+cleanedData <- lapply(cleanSplit, function(x) clean_and_filter_corpus(x))
 rm(cleanSplit)
 
 # Functions for 2-gram through 5-gram tokenizers
@@ -56,10 +60,11 @@ PreProcessGrams <- function(data, ngram) {
 }
 
 GramsToInts <- function(df, fromVec, toVec) {
-     # Take the n-gram words and convert to integer matrix with frequencies
+     # Take the n-gram words and convert to integer matrix
      # as the last column
      result <- ngramToMatrix(df[,1], fromVec, toVec)
-     result <- result[rowSums(is.na(result))==0,]
+     result[is.na(result)==1] = 0
+     #result <- result[rowSums(is.na(result))==0,]
      return(result)
 }
 
@@ -93,9 +98,9 @@ AddZeroCols <- function(mat, largestNGram = 5) {
 # Combine words dictionary
 TknRegWordsDict <- lapply(cleanedData, PreProcessWordsDict)
 TknRegWordsDict <- unlist(TknRegWordsDict)
-TknRegWordsDict <- as.data.frame(unique(TknRegWordsDict))
+TknRegWordsDict <- as.data.frame(unique(TknRegWordsDict),
+                                 stringsAsFactors = FALSE)
 colnames(TknRegWordsDict)[1] <- "words"
-TknRegWordsDict$words <- as.character(TknRegWordsDict$words)
 
 # Add row index to the uniqueWords list
 TknRegWordsDict$ID <- as.integer(1:nrow(TknRegWordsDict))
@@ -104,29 +109,25 @@ TknRegWordsDict$ID <- as.integer(1:nrow(TknRegWordsDict))
 TknRegBiGrams <- lapply(cleanedData, function(x) PreProcessGrams(x,2))
 TknRegBiGrams <- unlist(TknRegBiGrams)
 TknRegBiGrams <- unique(TknRegBiGrams)
-TknRegBiGrams <- as.data.frame(TknRegBiGrams)
-TknRegBiGrams[,1] <- as.character(TknRegBiGrams[,1])
+TknRegBiGrams <- as.data.frame(TknRegBiGrams, stringsAsFactors = FALSE)
 
 # Create unique trigrams list
 TknRegTriGrams <- lapply(cleanedData, function(x) PreProcessGrams(x,3))
 TknRegTriGrams <- unlist(TknRegTriGrams)
 TknRegTriGrams <- unique(TknRegTriGrams)
-TknRegTriGrams <- as.data.frame(TknRegTriGrams)
-TknRegTriGrams[,1] <- as.character(TknRegTriGrams[,1])
+TknRegTriGrams <- as.data.frame(TknRegTriGrams, stringsAsFactors = FALSE)
 
 # Create unique quadgrams list
 TknRegQuadGrams <- lapply(cleanedData, function(x) PreProcessGrams(x,4))
 TknRegQuadGrams <- unlist(TknRegQuadGrams)
 TknRegQuadGrams <- unique(TknRegQuadGrams)
-TknRegQuadGrams <- as.data.frame(TknRegQuadGrams)
-TknRegQuadGrams[,1] <- as.character(TknRegQuadGrams[,1])
+TknRegQuadGrams <- as.data.frame(TknRegQuadGrams, stringsAsFactors = FALSE)
 
 # Create unique quintgrams list
 TknRegQuintGrams <- lapply(cleanedData, function(x) PreProcessGrams(x,5))
 TknRegQuintGrams <- unlist(TknRegQuintGrams)
 TknRegQuintGrams <- unique(TknRegQuintGrams)
-TknRegQuintGrams <- as.data.frame(TknRegQuintGrams)
-TknRegQuintGrams[,1] <- as.character(TknRegQuintGrams[,1])
+TknRegQuintGrams <- as.data.frame(TknRegQuintGrams, stringsAsFactors = FALSE)
 
 rm(cleanedData)
 
@@ -180,4 +181,7 @@ rm(TknRegGramsMat)
 
 # Convert grams Matrix to data frame
 TknRegGrams <- as.data.frame(TknRegGrams)
-colnames(TknRegGrams) <- c("W1", "W2", "W3", "W4", "Y")
+colnames(TknRegGrams) <- c("V1", "V2", "V3", "V4", "Y")
+
+save(TknRegWordsDict, file = "TknRegWordsDict.RData")
+save(TknRegGrams, file = "TknRegGrams.RData")

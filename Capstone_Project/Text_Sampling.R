@@ -35,8 +35,13 @@ textSample <- function(fileStr, nLines, p = .25){
 }
 
 # sampling probability
-p = .025
+p = .01
+
+setwd(paste0(fileDir,"/sampled/"))
+system("rm en*.txt")
 
 textSample("en_US.twitter.txt", numLinesTwitter, p)
 textSample("en_US.news.txt", numLinesNews, p)
 textSample("en_US.blogs.txt", numLinesBlogs, p)
+
+system("cat *.txt > en_US.txt")

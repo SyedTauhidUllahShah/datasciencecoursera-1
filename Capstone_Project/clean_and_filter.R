@@ -14,18 +14,18 @@ readLinesFile <- function(filePath, n=-1L){
 clean_and_filter <- function(lines) {
      require(qdap, quietly = TRUE, warn.conflicts = FALSE)
      require(stringr, quietly = TRUE, warn.conflicts = FALSE)
-#      require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
-#      require(tm, quietly = TRUE, warn.conflicts = FALSE)
-#      require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
+#     require(SnowballC, warn.conflicts = FALSE, quietly = TRUE)
+#     require(tm, quietly = TRUE, warn.conflicts = FALSE)
+     require(RWeka, quietly = TRUE, warn.conflicts = FALSE)
+
+     # read in bad words file
+     badwords <- readLinesFile('~/Documents/School/Coursera Data Science/Capstone Project/final/en_US/badwords.txt')
      
      # conert all text to lower case
      lines <- tolower(lines)
      
      # Profanity filtering - set all profanity to EXPLICATIVE
-     profanityFound = c("shit", "asshole", "fuck", "fucking", "cunt", "damn",
-                        "bitch", "cock sucker", "dickhead", "dick head",
-                        "mother fucker", "fucker")
-     lines <- mgsub(profanityFound, "EXPLICATIVE", lines)
+     lines <- mgsub(badwords, "EXPLICATIVE", lines)
      
      # replace unicode symbols
      unicodeFound <- c("\u2019|\u2092|\u201D|\u201C|\U0001f466|\u0093i|\u0092m|\u0094|\u0093i|\u032")

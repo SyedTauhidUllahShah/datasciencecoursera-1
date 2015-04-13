@@ -1,0 +1,49 @@
+Captone Language Prediction Model
+========================================================
+author: lytemar
+date: `r format(Sys.Date(), format = "%B %d %Y")`
+transition: rotate
+autosize: true
+
+About the App
+========================================================
+- App that predicts to next word in a phrase
+- Very simple interface
+  - Enter a phrase
+  - Press the *Submit* button 
+  - See the predicted word in the *Result* box
+
+Algorithm
+========================================================
+<small>
+- Tokenize the 0.5% sampled corpus
+  - Obtain words, 2-grams, 3-grams, 4-grams and 5-grams
+  - Remove all profanity, numbers, punctuation and foreign words as possible
+- Generate dictionary of unique words with integer index
+- Generate a 5-entry integer vector that represents each n-gram
+     - Replace each word with its integer index from the dictionary
+     - The first four components are integer indices of the first four words
+     - Fill in missing word entries with zeros for shorter (than 5) n-grams
+          - The 5th component is the integer index of the last word of the n-gram
+          - Example integer vector for 3-gram: c(1547, 3467, 0, 0, 5764)
+</small>
+
+Algoritm Continued
+========================================================
+<small>
+- Create an n-gram data matrix by row binding all n-gram integer vectors
+- Train a boosted tree model for prediction (using the gbm package)
+     - Split data matrix into 75% training, 25% testing
+     - Choose best model using validation based on number of trees, interaction depth and shrinkage
+- Convert the last (up to) four words of the input phrase to an integer vector
+- Predict the next word's integer value from the tree model
+- Convert the predicted word's integer value to the word itself from dictionary lookup
+
+</small>
+
+App Usage
+====
+
+- The interface of the app consists of an *Input* box, *Submit* button, and *Result* box
+- Enter a phrase into the *Input* box
+- Press the *Submit* button and view the predicted word in the *Result* box
