@@ -1,4 +1,6 @@
 # Code to generate language prediction model
+require(reshape2)
+require(ggplot2)
 
 # 1. Preprocess the data
 #source('~/Documents/School/Johns Hopkins Data Science/datasciencecoursera/Capstone_Project/Regression_Model_PreProcessing.R')
@@ -14,10 +16,11 @@ train <- sample(1:smpLen, size = smpPer)
 
 # 3. run a boost model fit with cross-validation
 require(gbm, quietly = TRUE, warn.conflicts = FALSE)
-n.trees = seq(from = 600, to = 3000, by = 100)
+n.trees = seq(from = 100, to = 5000, by = 100)
 interaction.depth = c(2, 3, 4)
 shrinkage = c(0.001, 0.01, 0.1)
 
+learnRuns = length(interaction.depth) * length(shrinkage)
 totalRuns <- length(n.trees) * length(interaction.depth) * length(shrinkage)
 predMat = matrix(0, nrow = totalRuns, ncol = 4)
 runNum = 0
@@ -25,16 +28,16 @@ runNum = 0
 for(j in seq_along(interaction.depth)){
      for(k in seq_along(shrinkage)){
           runNum = runNum + 1
-          print(paste0('Run number ',runNum, ' out of ', totalRuns))
+          print(paste0('Run number ',runNum, ' out of ', learnRuns))
           boost.fit <- gbm(Y ~ .,
                            data = TknRegGrams[train,],
                            distribution = "gaussian",
-                           n.trees = 3000,
+                           n.trees = 5000,
                            shrinkage = shrinkage[k],
                            interaction.depth = interaction.depth[j],
                            n.cores = 6,
                            keep.data = FALSE)
-          save(boost.fit, file=paste0('boost-3000-',interaction.depth[j],
+          save(boost.fit, file=paste0('boost-5000-',interaction.depth[j],
                                       '-',shrinkage[k],'.model'))
      }
 }
@@ -46,7 +49,7 @@ for(i in seq_along(n.trees)){
                runNum = runNum + 1
                print(paste0('Run number ',runNum, ' out of ', totalRuns))
                rm(boost.fit)
-               load(paste0('boost-3000-',interaction.depth[j],
+               load(paste0('boost-5000-',interaction.depth[j],
                            '-',shrinkage[k],'.model'))
                pred = predict(boost.fit,
                               newdata=TknRegGrams[-train,],
@@ -101,3 +104,9 @@ Xdf <- convGramToDf(testVec, TknRegWordsDict$words, TknRegWordsDict$ID)
 #Pred <- as.integer(predict(fit, newdata = Xdf, type = "response"))
 Pred <- as.integer(predict(boost.fit, newdata = Xdf, n.trees = bestNumTrees))
 PredWord <- TknRegWordsDict$words[Pred]
+
+
+# Plot the curves
+m <- melt(as.data.frame(predMat), id.vars=c('V1','V2'))
+p <- ggplot(m, aes(x=V2, y=V1, color=as.factor(variable))) + geom_line()
+print(p)
